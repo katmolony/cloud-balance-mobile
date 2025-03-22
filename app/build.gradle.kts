@@ -72,4 +72,15 @@ dependencies {
 
     // ✅ Coroutines (For Asynchronous Operations)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    // Navigation
+    implementation ("androidx.navigation:navigation-compose:2.7.5")
+// Material 3
+    implementation ("androidx.compose.material3:material3:1.1.2")
+
+    implementation ("androidx.navigation:navigation-compose:2.7.6")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation ("androidx.activity:activity-compose:1.8.1")
+    implementation ("androidx.compose.material:material:1.5.4")
+
 }
