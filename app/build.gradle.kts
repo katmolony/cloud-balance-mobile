@@ -42,6 +42,21 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/INDEX.LIST",
+                "META-INF/io.netty.versions.properties" // 👈 add this line
+            )
+        }
+    }
 }
 
 dependencies {
@@ -82,5 +97,10 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation ("androidx.activity:activity-compose:1.8.1")
     implementation ("androidx.compose.material:material:1.5.4")
+
+// Cognito
+    implementation("aws.sdk.kotlin:cognitoidentityprovider:0.25.0-beta") // check for latest version
+    implementation(libs.aws.cognito.idp)
+    implementation(libs.aws.config)
 
 }

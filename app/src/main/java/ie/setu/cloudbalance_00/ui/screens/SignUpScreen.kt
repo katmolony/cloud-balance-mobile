@@ -9,22 +9,34 @@ import ie.setu.cloudbalance_00.viewmodel.AuthState
 import ie.setu.cloudbalance_00.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(
+fun SignupScreen(
     authViewModel: AuthViewModel,
-    onLoginSuccess: () -> Unit,
-    onNavigateToSignup: () -> Unit
+    onSignupSuccess: () -> Unit,
+    onBackToLogin: () -> Unit,
+    onConfirmRequired: (email: String) -> Unit
 ) {
     val scaffoldState = rememberScaffoldState()
     val authState by authViewModel.authState.collectAsState()
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     LaunchedEffect(authState) {
+        println("SignupScreen AuthState = $authState") // Debug log
+
         when (authState) {
-            is AuthState.LoginSuccess -> onLoginSuccess()
+            is AuthState.SignUpSuccess -> {
+                println("✅ SignUpSuccess - Navigating back to login")
+                onSignupSuccess()
+            }
+            is AuthState.ConfirmSignUpRequired -> {
+                val e = (authState as AuthState.ConfirmSignUpRequired).email
+                println("⚠️ Confirmation Required for $e")
+                onConfirmRequired(e)
+            }
             is AuthState.Error -> {
-                val error = (authState as AuthState.Error).message
-                scaffoldState.snackbarHostState.showSnackbar(error)
+                scaffoldState.snackbarHostState
+                    .showSnackbar((authState as AuthState.Error).message)
+                println("❌ Error - ${(authState as AuthState.Error).message}")
                 authViewModel.resetState()
             }
             else -> Unit
@@ -37,12 +49,12 @@ fun LoginScreen(
         }
 
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Login to Cloud Balance", style = MaterialTheme.typography.h6)
+            Text("Create an Account", style = MaterialTheme.typography.h6)
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
+                value = email,
+                onValueChange = { email = it },
                 label = { Text("Email") }
             )
 
@@ -53,20 +65,18 @@ fun LoginScreen(
             )
 
             Button(
-                onClick = { authViewModel.login(username, password) },
+                onClick = {
+                    println("📩 Sign Up button pressed with: $email / $password")
+                    authViewModel.signUp(email, password)
+                },
                 modifier = Modifier.padding(top = 16.dp)
             ) {
-                Text("Log In")
+                Text("Sign Up")
             }
 
-            TextButton(
-                onClick = onNavigateToSignup,
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text("Don’t have an account? Sign Up")
+            TextButton(onClick = onBackToLogin) {
+                Text("Back to Login")
             }
         }
     }
 }
-
-
