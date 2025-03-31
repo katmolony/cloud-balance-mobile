@@ -1,17 +1,24 @@
 package ie.setu.cloudbalance_00.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import aws.sdk.kotlin.services.cognitoidentityprovider.CognitoIdentityProviderClient
 import aws.sdk.kotlin.services.cognitoidentityprovider.model.*
+import ie.setu.cloudbalance_00.util.SecureStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.lifecycle.ViewModelProvider
+import ie.setu.cloudbalance_00.viewmodel.AuthViewModel
 
-class AuthViewModel : ViewModel() {
+
+class AuthViewModel(private val context: Context) : ViewModel() {
 
     private val clientId = "4mit5t5og0tvj8a72guvel3iqu"
     private val region = "us-east-1"
@@ -100,6 +107,31 @@ class AuthViewModel : ViewModel() {
                         if (response.authenticationResult != null) {
                             Log.d("AuthViewModel", "✅ Login successful for $email")
                             _authState.value = AuthState.LoginSuccess
+                            //Attach access token
+                            val accessToken = response.authenticationResult?.accessToken
+                            if (accessToken != null) {
+                                withContext(Dispatchers.Main) {
+                                    SecureStorage.saveAccessToken(context, accessToken)
+                                    // ✅ Set token for API calls
+                                    AuthTokenProvider.idToken = accessToken
+
+                                }
+                            }
+//                            val masterKey = MasterKey.Builder(context)
+//                                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+//                                .build()
+//
+//                            val sharedPrefs = EncryptedSharedPreferences.create(
+//                                context,
+//                                "secure_prefs",
+//                                masterKey,
+//                                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+//                                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+//                            )
+
+//                            val token = response.authenticationResult?.accessToken
+//                            sharedPrefs.edit().putString("access_token", token).apply()
+
                         } else {
                             Log.d("AuthViewModel", "⚠️ Login incomplete, needs confirmation")
                             _authState.value = AuthState.Error("Login incomplete. Try confirming your account first.")
