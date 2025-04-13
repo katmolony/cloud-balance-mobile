@@ -28,6 +28,16 @@ data class CreateUserResponse(
     val user: UserResponse
 )
 
+data class FetchAwsResponse(
+    val message: String,
+    val lambda_result: LambdaResult
+)
+
+data class LambdaResult(
+    val user_id: String,
+//    val cost: List<CostResponse>
+)
+
 
 interface ApiService {
     @GET("dev/api/users")
@@ -44,4 +54,11 @@ interface ApiService {
         @Path("user_id") userId: Int,
         @Header("Authorization") token: String
     ): GetAwsCostsResponse
+
+    @POST("dev/api/aws/fetch/{user_id}")
+    suspend fun fetchAwsForUser(
+        @Path("user_id") userId: Int,
+        @Body body: Map<String, String>
+    ): FetchAwsResponse
+
 }

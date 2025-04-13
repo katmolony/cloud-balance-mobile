@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
     val context = LocalContext.current
     var users by remember { mutableStateOf<List<UserResponse>>(emptyList()) }
 //    var costs by remember { mutableStateOf<List<AwsCost>>(emptyList()) }
@@ -79,5 +79,10 @@ fun HomeScreen() {
 //                Text("${cost.period_start.take(10)} — \$${cost.cost} ${cost.currency}")
 //            }
 //        }
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(onClick = onNavigateToAddIamRole) {
+            Text("Add IAM Role")
+        }
     }
 }
