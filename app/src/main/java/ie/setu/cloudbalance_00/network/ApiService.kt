@@ -49,16 +49,15 @@ interface ApiService {
     @GET("dev/api/users")
     suspend fun getUserByEmail(@Query("email") email: String): UserResponse
 
-    @GET("dev/api/aws/costs/{user_id}")
-    suspend fun getAwsCostsByUserId(
-        @Path("user_id") userId: Int,
-        @Header("Authorization") token: String
-    ): GetAwsCostsResponse
-
     @POST("dev/api/aws/fetch/{user_id}")
     suspend fun fetchAwsForUser(
         @Path("user_id") userId: Int,
         @Body body: Map<String, String>
     ): FetchAwsResponse
+
+    @GET("dev/api/aws/costs/{user_id}")
+    suspend fun getAwsCostsByUserId(
+        @Path("user_id") userId: Int
+    ): GetAwsCostsResponse
 
 }

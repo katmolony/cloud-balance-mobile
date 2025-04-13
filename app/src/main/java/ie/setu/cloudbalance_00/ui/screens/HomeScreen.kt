@@ -18,15 +18,16 @@ import kotlinx.coroutines.withContext
 fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
     val context = LocalContext.current
     var users by remember { mutableStateOf<List<UserResponse>>(emptyList()) }
-//    var costs by remember { mutableStateOf<List<AwsCost>>(emptyList()) }
+    var costs by remember { mutableStateOf<List<AwsCost>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    val userId = SecureStorage.getUserId(context)
     val token = SecureStorage.getAccessToken(context)
     val isTokenValid = !token.isNullOrBlank()
 
-    LaunchedEffect(isTokenValid) {
-        if (!isTokenValid) {
-            errorMessage = "❌ Missing access token"
+    LaunchedEffect(userId, token) {
+        if (userId == null || token.isNullOrBlank()) {
+            errorMessage = "❌ Missing access token or user ID"
             return@LaunchedEffect
         }
 
@@ -36,14 +37,21 @@ fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
             }
             users = usersResponse.users
 
-//            val costResponse = withContext(Dispatchers.IO) {
-//                RetrofitInstance.api.getAwsCostsByUserId(
-//                    userId = 1,
-//                    token = "Bearer $token"
-//                )
-//            }
-//            costs = costResponse.costs
-//            errorMessage = null
+            Log.d("HomeScreen", "➡️ Calling /api/aws/costs/$userId")
+            Log.d("HomeScreen", "➡️ Authorization: Bearer $token")
+
+            if (userId == null || userId == 0 || token.isNullOrBlank()) {
+                errorMessage = "❌ Invalid userId or missing access token"
+                return@LaunchedEffect
+            }
+
+            val costResponse = withContext(Dispatchers.IO) {
+                RetrofitInstance.api.getAwsCostsByUserId(
+                    userId = userId
+                )
+            }
+            costs = costResponse.costs
+            errorMessage = null
 
         } catch (e: Exception) {
             Log.e("HomeScreen", "❌ Failed to fetch data", e)
@@ -55,9 +63,9 @@ fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
         Text("Welcome to the Home Screen!", style = MaterialTheme.typography.h5)
         Spacer(modifier = Modifier.height(16.dp))
 
-        errorMessage?.let {
-            Text(it)
-            return@Column
+        if (errorMessage != null) {
+            Text(errorMessage!!)
+            return
         }
 
         Text("Users:", style = MaterialTheme.typography.h6)
@@ -72,13 +80,19 @@ fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
 
         Text("AWS Cost Data:", style = MaterialTheme.typography.h6)
-//        if (costs.isEmpty()) {
-//            Text("No cost data available.")
-//        } else {
-//            costs.forEach { cost ->
-//                Text("${cost.period_start.take(10)} — \$${cost.cost} ${cost.currency}")
-//            }
-//        }
+
+        if (costs.isEmpty()) {
+            Text("No cost data available.")
+        } else {
+            val total = costs.sumOf { it.cost.toDoubleOrNull() ?: 0.0 }
+            Text("Total: \$${String.format("%.2f", total)} USD")
+
+            Spacer(modifier = Modifier.height(8.dp))
+            costs.forEach { cost ->
+                Text("${cost.period_start.take(10)} — \$${cost.cost} ${cost.currency}")
+            }
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(onClick = onNavigateToAddIamRole) {
