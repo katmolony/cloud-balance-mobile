@@ -1,20 +1,23 @@
-# Cloud Balance - Mobile App
+# 📱 Cloud Balance - Mobile App
 
-Cloud Balance is a **Mobile Cloud Resource Manager** that allows students and lecturers to monitor their AWS resource usage and costs. This repository contains the **Android mobile app**, built using **Kotlin** and **Jetpack Compose**.
+**Cloud Balance** is a mobile-first **AWS Cloud Resource Manager**, designed specifically for students and lecturers working in cloud-based academic settings. It allows users to securely connect their AWS accounts and monitor resource usage and costs in real time. This repository contains the **Android app**, built using **Kotlin** and **Jetpack Compose**, with secure authentication via **Amazon Cognito** and data fetching through a custom backend API.
+## ✨ Features
 
-## 📱 Features
-- View AWS resource usage and costs in real time
-- Receive alerts for cost overruns and security issues
-- Lecturer dashboard for managing multiple student accounts
-- Secure authentication (OAuth2 planned)
-- Modern UI with Jetpack Compose
+- 🔐 Secure login and signup with **Amazon Cognito**
+- 📊 View real-time AWS cost and EC2 resource data
+- 🧾 Submit IAM Role ARN for secure, keyless access
+- 📱 Clean and responsive UI built with Jetpack Compose
+- 📩 IAM Role onboarding guide embedded in-app
 
 ## 🛠️ Tech Stack
-- **Kotlin** - Primary programming language
-- **Jetpack Compose** - Modern UI framework
-- **Retrofit** - API client for backend communication
-- **Firebase Cloud Messaging (Planned)** - Push notifications
-- **AWS Cost Explorer API (Planned)** - Fetch AWS spending data
+
+- **Kotlin** – Programming language for Android
+- **Jetpack Compose** – Modern UI framework
+- **Retrofit** – For communicating with backend API
+- **EncryptedSharedPreferences** – Secure local token storage
+- **Amazon Cognito** – User authentication (no OAuth2 required)
+- **AWS STS + Cost Explorer + EC2 APIs** – Real AWS usage integration (via backend)
+- **PostgreSQL** – Cloud database via RDS (backend)
 
 ## 📦 Installation
 
@@ -44,16 +47,26 @@ private const val BASE_URL = "http://127.0.0.1:8000"
 
 ## 📜 API Endpoints
 
-| Method | Endpoint           | Description                  |
-|--------|--------------------|------------------------------|
-| POST   | `/resource-usage/` | Track AWS resource usage     |
-| GET    | `/`                | Health check (API status)    |
+| Method | Endpoint                     | Description                                |
+|--------|------------------------------|--------------------------------------------|
+| POST   | `/api/users`                 | Create new user                            |
+| POST   | `/api/iam-roles/`            | Submit IAM Role ARN                        |
+| GET    | `/api/iam-roles/:user_id`    | Retrieve IAM Role for a user               |
+| POST   | `/api/aws/fetch/:user_id`    | Trigger AWS resource and cost data fetch   |
+| GET    | `/api/aws/costs/:user_id`    | Retrieve stored AWS cost data              |
+| GET    | `/api/aws/resources/:user_id`| Retrieve stored AWS EC2 resource metadata  |
 
 ### **🛠️ Planned Features**
-* OAuth2 Authentication
-* Push Notifications for Cost Alerts
-* Multi-Account Management for Lecturers
-* AWS API Integration for Real-Time Cost Tracking
+- 📣 Push notifications for budget alerts
+- 📈 Cost analytics visualised with charts
+- 🧑‍🏫 Lecturer portal with student role filtering
+- 🔄 Periodic data sync using EventBridge (backend)
+
+## 🧭 System Architecture
+
+The diagram below illustrates how the Cloud Balance mobile app, backend API, AWS Lambda functions, and PostgreSQL database interact across public and private cloud environments.
+
+![Cloud Balance Architecture](assets/architecture.png)
 
 ### **👥 Contributors**
 * Kate Molony - GitHub
