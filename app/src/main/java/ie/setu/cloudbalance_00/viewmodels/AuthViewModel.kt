@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import aws.sdk.kotlin.services.cognitoidentityprovider.CognitoIdentityProviderClient
 import aws.sdk.kotlin.services.cognitoidentityprovider.model.*
+import ie.setu.cloudbalance_00.network.CreateUserRequest
+import ie.setu.cloudbalance_00.network.RetrofitInstance
 import ie.setu.cloudbalance_00.util.SecureStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -102,15 +104,37 @@ class AuthViewModel(private val context: Context) : ViewModel() {
 
                         val response = client.initiateAuth(request)
                         if (response.authenticationResult != null) {
-                            Log.d("AuthViewModel", "✅ Login successful for $email")
-                            _authState.value = AuthState.LoginSuccess
-
                             val accessToken = response.authenticationResult?.accessToken
                             if (accessToken != null) {
                                 withContext(Dispatchers.Main) {
                                     SecureStorage.saveAccessToken(context, accessToken)
                                     AuthTokenProvider.idToken = accessToken
                                 }
+
+                                // 👇 Check if user already exists
+                                val usersResponse = RetrofitInstance.api.getAllUsers()
+                                val existingUser = usersResponse.users.find { it.email == email }
+
+                                val userId = if (existingUser != null) {
+                                    Log.d("AuthViewModel", "✅ Existing user found: ID=${existingUser.id}")
+                                    existingUser.id
+                                } else {
+                                    Log.d("AuthViewModel", "👤 User not found, creating new user...")
+                                    val createResponse = RetrofitInstance.api.createUser(
+                                        CreateUserRequest(
+                                            name = email.substringBefore("@").replaceFirstChar { it.uppercaseChar() }, // e.g. "kate"
+                                            email = email
+                                        )
+                                    )
+                                    createResponse.user.id
+                                }
+
+                                SecureStorage.saveUserId(context, userId)
+                                Log.d("AuthViewModel", "🔐 Stored userId: $userId")
+                                _authState.value = AuthState.LoginSuccess
+
+                            } else {
+                                _authState.value = AuthState.Error("Access token missing")
                             }
                         } else {
                             Log.d("AuthViewModel", "⚠️ Login incomplete, needs confirmation")
