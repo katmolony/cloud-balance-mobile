@@ -24,7 +24,7 @@ fun ConfirmSignupScreen(
         when (authState) {
             is AuthState.SignUpSuccess -> onConfirmSuccess()
             is AuthState.Error -> {
-                // Optional: Show snackbar or log error
+
             }
             else -> Unit
         }
