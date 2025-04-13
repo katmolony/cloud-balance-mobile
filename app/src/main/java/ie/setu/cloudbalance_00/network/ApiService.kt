@@ -18,7 +18,25 @@ data class CreateUserRequest(
     val email: String
 )
 
-// Wrapper to match backend shape
+data class SaveIamRoleRequest(
+    val user_id: Int,
+    val role_arn: String,
+    val external_id: String? = null
+)
+
+data class SaveIamRoleResponse(
+    val message: String,
+    val iamRole: IamRole
+)
+
+data class IamRole(
+    val id: Int,
+    val user_id: Int,
+    val role_arn: String,
+    val external_id: String?,
+    val created_at: String
+)
+
 data class GetUsersResponse(
     val users: List<UserResponse>
 )
@@ -59,5 +77,15 @@ interface ApiService {
     suspend fun getAwsCostsByUserId(
         @Path("user_id") userId: Int
     ): GetAwsCostsResponse
+
+    @POST("dev/api/iam-roles")
+    suspend fun saveIamRole(
+        @Body request: SaveIamRoleRequest
+    ): SaveIamRoleResponse
+
+//
+//    @GET("dev/api/aws/iam-roles/{user_id}")
+//    suspend fun getIamRoleByUserId(@Path("user_id") userId: Int): IamRoleResponse?
+
 
 }

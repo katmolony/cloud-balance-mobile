@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ie.setu.cloudbalance_00.network.RetrofitInstance
+import ie.setu.cloudbalance_00.network.SaveIamRoleRequest
 import ie.setu.cloudbalance_00.util.SecureStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,6 @@ fun AddIamRoleScreen() {
     var responseMessage by remember { mutableStateOf<String?>(null) }
 
     val token = SecureStorage.getAccessToken(context)
-    val userId = SecureStorage.getUserId(context)
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Enter your IAM Role ARN", style = MaterialTheme.typography.h6)
@@ -36,19 +36,24 @@ fun AddIamRoleScreen() {
 
         Button(
             onClick = {
+                val userId = SecureStorage.getUserId(context)
                 if (token != null && userId != null && roleArn.isNotBlank()) {
                     CoroutineScope(Dispatchers.IO).launch {
                         try {
-                            val body = mapOf(
-                                "role_arn" to roleArn,
-                                "external_id" to "cloud-balance-dev"
+                            val saveRequest = SaveIamRoleRequest(
+                                user_id = userId,
+                                role_arn = roleArn,
+                                external_id = "cloud-balance-dev"
                             )
-                            val response = RetrofitInstance.api.fetchAwsForUser(userId, body)
+
+                            val response = RetrofitInstance.api.saveIamRole(saveRequest)
+
                             withContext(Dispatchers.Main) {
                                 responseMessage = "✅ ${response.message}"
+                                Log.d("AddIamRoleScreen", "✅ Saved IAM Role: ${response.iamRole.role_arn}")
                             }
                         } catch (e: Exception) {
-                            Log.e("AddIamRoleScreen", "❌ API call failed", e)
+                            Log.e("AddIamRoleScreen", "❌ Failed to save IAM Role", e)
                             withContext(Dispatchers.Main) {
                                 responseMessage = "❌ Failed: ${e.message}"
                             }
@@ -69,3 +74,4 @@ fun AddIamRoleScreen() {
         }
     }
 }
+
