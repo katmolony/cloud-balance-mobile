@@ -66,7 +66,7 @@ private const val BASE_URL = "http://127.0.0.1:8000"
 
 The diagram below illustrates how the Cloud Balance mobile app, backend API, AWS Lambda functions, and PostgreSQL database interact across public and private cloud environments.
 
-![Cloud Balance Architecture](assets/architecture.png)
+![Cloud Balance Architecture](assets/architect.png)
 
 ### **👥 Contributors**
 * Kate Molony - GitHub
