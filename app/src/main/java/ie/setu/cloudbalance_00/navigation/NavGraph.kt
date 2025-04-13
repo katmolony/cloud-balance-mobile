@@ -47,11 +47,18 @@ fun NavGraph(
 
         composable(NavRoutes.Home.route) {
             HomeScreen(
-                onNavigateToAddIamRole = { navController.navigate(NavRoutes.AddIamRole.route) }
+                onNavigateToAddIamRole = { navController.navigate(NavRoutes.AddIamRole.route) },
+                onNavigateToIamRoleGuide = { navController.navigate(NavRoutes.IamRoleGuide.route) }
             )
         }
         composable(NavRoutes.AddIamRole.route) {
             AddIamRoleScreen()
+        }
+
+        composable(NavRoutes.IamRoleGuide.route) {
+            IamRoleGuideScreen(
+                onNavigateToInput = { navController.navigate(NavRoutes.AddIamRole.route) }
+            )
         }
     }
 }

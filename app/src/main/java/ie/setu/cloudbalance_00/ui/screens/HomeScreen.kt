@@ -13,13 +13,18 @@ import ie.setu.cloudbalance_00.network.RetrofitInstance
 import ie.setu.cloudbalance_00.util.SecureStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 
 @Composable
-fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
+fun HomeScreen(
+    onNavigateToAddIamRole: () -> Unit,
+    onNavigateToIamRoleGuide: () -> Unit
+) {
     val context = LocalContext.current
     var users by remember { mutableStateOf<List<UserResponse>>(emptyList()) }
     var costs by remember { mutableStateOf<List<AwsCost>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var userHasNoIamRole by remember { mutableStateOf(false) }
 
     val userId = SecureStorage.getUserId(context)
     val token = SecureStorage.getAccessToken(context)
@@ -30,20 +35,33 @@ fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
             errorMessage = "❌ Missing access token or user ID"
             return@LaunchedEffect
         }
+        try {
+            withContext(Dispatchers.IO) {
+                RetrofitInstance.api.getIamRoleByUserId(userId)
+            }
+            userHasNoIamRole = false
+        } catch (e: HttpException) {
+            if (e.code() == 404) {
+                userHasNoIamRole = true
+                Log.d("HomeScreen", "ℹ️ No IAM Role found for user $userId")
+            } else {
+                Log.e("HomeScreen", "❌ IAM Role check failed", e)
+            }
+        }
 
         try {
-            val usersResponse = withContext(Dispatchers.IO) {
-                RetrofitInstance.api.getAllUsers()
-            }
-            users = usersResponse.users
-
-            Log.d("HomeScreen", "➡️ Calling /api/aws/costs/$userId")
-            Log.d("HomeScreen", "➡️ Authorization: Bearer $token")
-
-            if (userId == null || userId == 0 || token.isNullOrBlank()) {
-                errorMessage = "❌ Invalid userId or missing access token"
-                return@LaunchedEffect
-            }
+//            val usersResponse = withContext(Dispatchers.IO) {
+//                RetrofitInstance.api.getAllUsers()
+//            }
+//            users = usersResponse.users
+//
+//            Log.d("HomeScreen", "➡️ Calling /api/aws/costs/$userId")
+//            Log.d("HomeScreen", "➡️ Authorization: Bearer $token")
+//
+//            if (userId == null || userId == 0 || token.isNullOrBlank()) {
+//                errorMessage = "❌ Invalid userId or missing access token"
+//                return@LaunchedEffect
+//            }
 
             val costResponse = withContext(Dispatchers.IO) {
                 RetrofitInstance.api.getAwsCostsByUserId(
@@ -68,15 +86,6 @@ fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
             return
         }
 
-        Text("Users:", style = MaterialTheme.typography.h6)
-        if (users.isEmpty()) {
-            Text("Loading users...")
-        } else {
-            users.forEach {
-                Text("${it.name} - ${it.email}")
-            }
-        }
-
         Spacer(modifier = Modifier.height(24.dp))
 
         Text("AWS Cost Data:", style = MaterialTheme.typography.h6)
@@ -90,6 +99,14 @@ fun HomeScreen( onNavigateToAddIamRole: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             costs.forEach { cost ->
                 Text("${cost.period_start.take(10)} — \$${cost.cost} ${cost.currency}")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        if (userHasNoIamRole) {
+            Button(onClick = onNavigateToIamRoleGuide) {
+                Text("Setup IAM Role")
             }
         }
 

@@ -29,6 +29,10 @@ data class SaveIamRoleResponse(
     val iamRole: IamRole
 )
 
+data class IamRoleResponse(
+    val iamRole: IamRole
+)
+
 data class IamRole(
     val id: Int,
     val user_id: Int,
@@ -83,9 +87,7 @@ interface ApiService {
         @Body request: SaveIamRoleRequest
     ): SaveIamRoleResponse
 
-//
-//    @GET("dev/api/aws/iam-roles/{user_id}")
-//    suspend fun getIamRoleByUserId(@Path("user_id") userId: Int): IamRoleResponse?
-
+    @GET("dev/api/iam-roles/{user_id}")
+    suspend fun getIamRoleByUserId(@Path("user_id") userId: Int): IamRoleResponse
 
 }
