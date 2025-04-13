@@ -12,7 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun IamRoleGuideScreen(onNavigateToInput: () -> Unit) {
+fun IamRoleGuideScreen(
+    onNavigateToInput: () -> Unit,
+    onNavigateBack: () -> Unit
+) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Step-by-Step: Getting Your IAM Role ARN", style = MaterialTheme.typography.h6)
         Spacer(modifier = Modifier.height(16.dp))
@@ -36,5 +39,15 @@ fun IamRoleGuideScreen(onNavigateToInput: () -> Unit) {
         ) {
             Text("Go to IAM Role Input")
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = onNavigateBack,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text("Back to Home")
+        }
     }
 }
+

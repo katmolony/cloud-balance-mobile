@@ -82,6 +82,11 @@ interface ApiService {
         @Path("user_id") userId: Int
     ): GetAwsCostsResponse
 
+    @GET("dev/api/aws/resources/{user_id}")
+    suspend fun getAwsResourcesByUserId(
+        @Path("user_id") userId: Int
+    ): GetAwsResourcesResponse
+
     @POST("dev/api/iam-roles")
     suspend fun saveIamRole(
         @Body request: SaveIamRoleRequest

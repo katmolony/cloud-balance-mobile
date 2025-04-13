@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ie.setu.cloudbalance_00.network.AwsCost
+import ie.setu.cloudbalance_00.network.AwsResource
 import ie.setu.cloudbalance_00.network.UserResponse
 import ie.setu.cloudbalance_00.network.RetrofitInstance
 import ie.setu.cloudbalance_00.util.SecureStorage
@@ -25,6 +26,8 @@ fun HomeScreen(
     var costs by remember { mutableStateOf<List<AwsCost>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var userHasNoIamRole by remember { mutableStateOf(false) }
+    var resources by remember { mutableStateOf<List<AwsResource>>(emptyList()) }
+
 
     val userId = SecureStorage.getUserId(context)
     val token = SecureStorage.getAccessToken(context)
@@ -50,18 +53,6 @@ fun HomeScreen(
         }
 
         try {
-//            val usersResponse = withContext(Dispatchers.IO) {
-//                RetrofitInstance.api.getAllUsers()
-//            }
-//            users = usersResponse.users
-//
-//            Log.d("HomeScreen", "➡️ Calling /api/aws/costs/$userId")
-//            Log.d("HomeScreen", "➡️ Authorization: Bearer $token")
-//
-//            if (userId == null || userId == 0 || token.isNullOrBlank()) {
-//                errorMessage = "❌ Invalid userId or missing access token"
-//                return@LaunchedEffect
-//            }
 
             val costResponse = withContext(Dispatchers.IO) {
                 RetrofitInstance.api.getAwsCostsByUserId(
@@ -75,6 +66,13 @@ fun HomeScreen(
             Log.e("HomeScreen", "❌ Failed to fetch data", e)
             errorMessage = "❌ Failed to load data: ${e.message ?: "Unknown error"}"
         }
+
+        val resourcesResponse = withContext(Dispatchers.IO) {
+            RetrofitInstance.api.getAwsResourcesByUserId(
+                userId = userId
+            )
+        }
+        resources = resourcesResponse.resources
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
@@ -99,6 +97,17 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
             costs.forEach { cost ->
                 Text("${cost.period_start.take(10)} — \$${cost.cost} ${cost.currency}")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text("AWS Resource Data:", style = MaterialTheme.typography.h6)
+        if (resources.isEmpty()) {
+            Text("No resource data available.")
+        } else {
+            resources.forEach { res ->
+                Text("${res.service_name} (${res.region}): ${res.resource_id}")
             }
         }
 

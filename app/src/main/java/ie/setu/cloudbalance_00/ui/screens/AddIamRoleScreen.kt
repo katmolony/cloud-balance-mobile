@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun AddIamRoleScreen() {
+fun AddIamRoleScreen(onNavigateBack: () -> Unit) {
     val context = LocalContext.current
     var roleArn by remember { mutableStateOf("") }
     var responseMessage by remember { mutableStateOf<String?>(null) }
@@ -71,6 +71,14 @@ fun AddIamRoleScreen() {
         responseMessage?.let {
             Spacer(modifier = Modifier.height(24.dp))
             Text(it)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onNavigateBack,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text("Back to Home")
         }
     }
 }

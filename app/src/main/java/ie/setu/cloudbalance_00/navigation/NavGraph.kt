@@ -52,12 +52,14 @@ fun NavGraph(
             )
         }
         composable(NavRoutes.AddIamRole.route) {
-            AddIamRoleScreen()
+            AddIamRoleScreen(
+                onNavigateBack = { navController.popBackStack(NavRoutes.Home.route, inclusive = false) })
         }
 
         composable(NavRoutes.IamRoleGuide.route) {
             IamRoleGuideScreen(
-                onNavigateToInput = { navController.navigate(NavRoutes.AddIamRole.route) }
+                onNavigateToInput = { navController.navigate(NavRoutes.AddIamRole.route) },
+                onNavigateBack = { navController.popBackStack(NavRoutes.Home.route, inclusive = false) }
             )
         }
     }
